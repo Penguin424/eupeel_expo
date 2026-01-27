@@ -17,6 +17,7 @@ class VentaService extends ChangeNotifier {
   String _numTel = "";
   String _metodoPago = "";
   String _nota = "";
+  ProductoCosbiomeModel _productoEupeelSelected = ProductoCosbiomeModel();
 
   int get cantidad => _cantidad;
   List<Map<String, dynamic>> get productosVenta => _productosVenta;
@@ -27,6 +28,7 @@ class VentaService extends ChangeNotifier {
   String get numTel => _numTel;
   String get metodoPago => _metodoPago;
   String get nota => _nota;
+  ProductoCosbiomeModel get productoEupeel => _productoEupeelSelected;
 
   set productosVenta(List<Map<String, dynamic>> value) {
     _productosVenta.clear();
@@ -74,6 +76,11 @@ class VentaService extends ChangeNotifier {
 
   set nota(String value) {
     _nota = value;
+    notifyListeners();
+  }
+
+  set productoEupeelSelected(ProductoCosbiomeModel value) {
+    _productoEupeelSelected = value;
     notifyListeners();
   }
 
@@ -204,8 +211,8 @@ class VentaService extends ChangeNotifier {
 
       handleAddProductoVenta(
         producto: {
-          "producto": producto.nombreProducto!,
-          "precio": producto.precioVenta!.toString(),
+          "producto": _productoEupeelSelected.nombreProducto!,
+          "precio": _productoEupeelSelected.precioVenta!.toString(),
         },
         cantidad: cantidad,
       );
@@ -229,6 +236,8 @@ class VentaService extends ChangeNotifier {
       final productoEupeel = ProductoCosbiomeModel.fromJson(
         productoEupeelDB.data,
       );
+
+      productoEupeelSelected = productoEupeel;
 
       int stockAVerificar = productoEupeel.general!;
 

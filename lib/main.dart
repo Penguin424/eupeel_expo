@@ -5,6 +5,8 @@ import 'package:loader_overlay/loader_overlay.dart';
 import 'package:toastification/toastification.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
   return runApp(
     ProviderScope(
       child: MyApp(),

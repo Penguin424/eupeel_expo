@@ -1,10 +1,10 @@
+import 'package:eupeel_expo/src/models/producto_cosbiome_model.dart';
 import 'package:eupeel_expo/src/providers/almacen_provider.dart';
 import 'package:eupeel_expo/src/providers/venta_provider.dart';
-import 'package:eupeel_expo/src/widgets/camera_preview_widget.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import 'package:nfc_manager/nfc_manager.dart';
+import 'package:nfc_manager_ndef/nfc_manager_ndef.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -40,71 +40,67 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
 
-              Text(
-                "Escano activado: ${almacen.enableScanning ? "SI" : "NO"}",
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-
               const SizedBox(height: 20),
 
-              SizedBox(
-                height: size.height * 0.2,
-                child: CameraPreviewWidget(
-                  enableAutoCapture: almacen.enableScanning,
-                  captureIntervalMs: 2200,
-                  enableScanBox: true, // Activa el recuadro de escaneo
-                  scanBoxWidthRatio: 0.8, // 80% del ancho
-                  scanBoxHeightRatio: 0.4, //
-                  onImageCaptured: (imageFile) async {
-                    final inputImage = InputImage.fromFilePath(imageFile!.path);
-                    final textRecognizer = TextRecognizer(
-                      script: TextRecognitionScript.latin,
+              ElevatedButton(
+                onPressed: () async {
+                  NfcAvailability availability = await NfcManager.instance
+                      .checkAvailability();
+
+                  if (availability != NfcAvailability.enabled) {
+                    print(
+                      'NFC may not be supported or may be temporarily disabled.',
                     );
-                    final RecognizedText recognizedText = await textRecognizer
-                        .processImage(
-                          inputImage,
-                        );
-                    String scannedText = "";
+                    return;
+                  }
 
-                    for (var block in recognizedText.blocks) {
-                      scannedText = block.text.trim().replaceAll(" ", "");
-                    }
+                  // Start the session.
 
-                    if (kDebugMode) {
-                      print(
-                        "TEXTO DETECTADO: $scannedText",
-                      );
-                    }
+                  NfcManager.instance.startSession(
+                    onSessionErrorIos: (p0) {
+                      print('NFC Session Error: ${p0.message}');
 
-                    if (scannedText.isEmpty) {
-                      almacen.scannedTextService =
-                          'No se detectó texto en la imagen.';
-                    } else {
-                      final regex = RegExp(r'\b\w{24}\b');
-                      final match = regex.firstMatch(scannedText);
+                      NfcManager.instance.stopSession();
+                    },
+                    alertMessageIos: 'Acerca el dispositivo al tag NFC',
+                    pollingOptions: {
+                      NfcPollingOption.iso14443,
+                    },
+                    onDiscovered: (NfcTag tag) async {
+                      // Do something with an NfcTag instance...
+                      final Ndef? ndef = Ndef.from(tag);
 
-                      if (match != null) {
-                        scannedText = match.group(0)!;
-                      } else {
-                        almacen.scannedTextService =
-                            'No se encontró un ID válido de 24 caracteres.';
+                      if (ndef == null) {
+                        print('This tag is not compatible with NDEF.');
+                        return;
                       }
-                    }
 
-                    textRecognizer.close();
+                      final ndefMessage = await ndef.read();
 
-                    await almacen.handleGetProductoConId(
-                      context,
-                      scannedText,
-                      size,
-                    );
-                  },
-                ),
+                      if (ndefMessage == null) {
+                        print('Failed to read NDEF message from the tag.');
+                        return;
+                      }
+
+                      final payload = ndefMessage.records.first.payload;
+                      String payloadString = String.fromCharCodes(
+                        payload,
+                      ).split("en").last;
+
+                      await venta.handleAddProductoEupeel(
+                        context: context,
+                        almacen: "general",
+                        producto: ProductoCosbiomeModel(
+                          id: payloadString,
+                        ),
+                        cantidad: 1,
+                      );
+
+                      await NfcManager.instance.stopSession();
+                    },
+                  );
+                },
+                child: const Text("Escanear Producto"),
               ),
 
               const SizedBox(height: 20),
