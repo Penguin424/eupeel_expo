@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:animated_background/animated_background.dart';
 // import 'package:eupeel_expo/src/models/producto_cosbiome_model.dart';
 import 'package:eupeel_expo/src/providers/almacen_provider.dart';
 import 'package:eupeel_expo/src/providers/nfc_provider.dart';
 import 'package:eupeel_expo/src/providers/venta_provider.dart';
+import 'package:eupeel_expo/src/utils/upgrade_service.dart';
 // import 'package:eupeel_expo/src/services/nfc_services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,9 +19,21 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen>
     with TickerProviderStateMixin {
+  final _upgradeService = UpgradeService();
+  Timer? _updateTimer;
+
   @override
   void initState() {
     super.initState();
+
+    // 1. Validar al abrir la app
+    _checkUpdate();
+
+    // 2. Validar cada 2 horas (opcional)
+    _updateTimer = Timer.periodic(Duration(hours: 2), (timer) {
+      _checkUpdate();
+    });
+
     final nfc = ref.read(nfcProvider);
     final venta = ref.read(ventaProvider);
     final almacen = ref.read(almacenProvider);
@@ -28,6 +43,45 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       nfc.toggleAutoLoop(context, true);
       almacen.handleGetProductos();
     });
+  }
+
+  void _checkUpdate() {
+    _upgradeService.checkForUpdatesWindows((newVersion, assetId) {
+      _showUpdateDialog(newVersion, assetId);
+    });
+  }
+
+  void _showUpdateDialog(String version, String assetId) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Text("Nueva actualización v$version"),
+        content: Text(
+          "Hay una nueva versión disponible. ¿Deseas actualizar ahora?",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("Más tarde"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _showDownloadingUI(assetId);
+            },
+            child: Text("Actualizar ahora"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDownloadingUI(String assetId) {
+    // Aquí puedes mostrar un diálogo con una barra de carga
+
+    // mientras llamas a _upgradeService.downloadAndInstallWindows(assetId);
+    _upgradeService.downloadAndInstallWindows(assetId);
   }
 
   @override
