@@ -75,7 +75,7 @@ pipeline {
                         --ssl-no-revoke ^
                         -H "Authorization: token ${GITHUB_TOKEN_PSW}" ^
                         -H "Content-Type: application/octet-stream" ^
-                        --data-binary "@build\\windows\\x64\\runner\\Release\\eupeel_laboratorio.msix" ^
+                        --data-binary "@build\\windows\\x64\\runner\\Release\\eupeel_expo.msix" ^
                         "https://uploads.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/${RELEASE_ID}/assets?name=Instalador_Windows_v${APP_VERSION}.msix"
                         """
 
