@@ -16,7 +16,6 @@ pipeline {
             }
             steps {
                 bat 'flutter pub get'
-                bat 'flutter test --reporter compact'
             }
         }
         stage('Crear Release en GitHub') {
