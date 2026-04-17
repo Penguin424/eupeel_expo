@@ -1,7 +1,9 @@
-import 'package:eupeel_expo/src/models/producto_cosbiome_model.dart';
+import 'package:animated_background/animated_background.dart';
+// import 'package:eupeel_expo/src/models/producto_cosbiome_model.dart';
+import 'package:eupeel_expo/src/providers/almacen_provider.dart';
 import 'package:eupeel_expo/src/providers/nfc_provider.dart';
 import 'package:eupeel_expo/src/providers/venta_provider.dart';
-import 'package:eupeel_expo/src/services/nfc_services.dart';
+// import 'package:eupeel_expo/src/services/nfc_services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -12,109 +14,108 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<ConsumerStatefulWidget> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen>
+    with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
     final nfc = ref.read(nfcProvider);
+    final venta = ref.read(ventaProvider);
+    final almacen = ref.read(almacenProvider);
 
     Future.delayed(Duration.zero, () {
+      venta.isRedirectToCheckOut = true;
       nfc.toggleAutoLoop(context, true);
+      almacen.handleGetProductos();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final nfc = ref.watch(nfcProvider);
-    final venta = ref.read(ventaProvider);
+    // final nfc = ref.watch(nfcProvider);
+    // final venta = ref.read(ventaProvider);
     final size = MediaQuery.of(context).size;
 
-    if (nfc.status == "¡Lectura Auto Exitosa!") {
-      print(nfc.status);
-      venta.handleAddProductoEupeel(
-        context: context,
-        almacen: "general",
-        producto: ProductoCosbiomeModel(
-          id: nfc.readText,
-        ),
-        cantidad: 1,
-      );
-    }
+    // print("ESTADO DE LECTURA NFC: ${nfc.status}");
+
+    // if (nfc.status == "¡Lectura Auto Exitosa!") {
+    //   venta.handleAddProductoEupeel(
+    //     context: context,
+    //     almacen: "enExpo",
+    //     producto: ProductoCosbiomeModel(
+    //       id: nfc.readText,
+    //     ),
+    //     cantidad: 1,
+    //   );
+    // }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home Screen'),
-      ),
-      body: Center(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'REGISTRO PRODUCTO ESTATUS:',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 20,
-                color: Colors.black54,
-              ),
-            ),
-            Text(
-              nfc.status,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-            ),
-            SizedBox(height: size.height * 0.02),
-            const Text(
-              'PRODUCTO LEÍDO:',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 20,
-                color: Colors.black54,
-              ),
-            ),
-            Text(
-              nfc.readText,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              height: size.height * 0.4,
+      backgroundColor: Colors.white,
 
-              child: ListView.separated(
-                itemBuilder: (_, index) {
-                  final producto = venta.productosVenta[index];
-                  return ListTile(
-                    title: Text(producto["producto"]),
-                    subtitle: Text('Cantidad: ${producto["cantidad"]}'),
-                  );
-                },
-                separatorBuilder: (_, __) => const Divider(),
-                itemCount: venta.productosVenta.length,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Row(
+      body: AnimatedBackground(
+        behaviour: RandomParticleBehaviour(
+          options: ParticleOptions(
+            baseColor: Colors.grey.shade400,
+            spawnMinRadius: 40.0,
+            spawnMaxRadius: 90.0,
+            spawnMaxSpeed: 100.0,
+            spawnMinSpeed: 30.0,
+            particleCount: 70,
+          ),
+        ),
+        vsync: this,
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'SUBTOTAL: ${venta.subTotal}',
+                  'Escanea tu producto Eupeel',
                   style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.black,
+                    fontSize: size.width * 0.05,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[800],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    //Here goes the same radius, u can put into a var or function
+                    borderRadius: BorderRadius.circular(600),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color(0x54000000),
+                        spreadRadius: 2,
+                        blurRadius: 20,
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(250),
+
+                    child: CircleAvatar(
+                      backgroundColor: Colors.white,
+
+                      radius: size.width * 0.2,
+                      child: Hero(
+                        tag: 'eupeel_logo_png',
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.pushNamed(context, "/checkout");
+                          },
+                          child: Image.asset(
+                            'assets/images/eupeel_logo.png',
+                            width: size.width * 0.6,
+                            height: size.height * 0.4,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );

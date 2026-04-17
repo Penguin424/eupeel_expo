@@ -1,3 +1,4 @@
+import 'package:eupeel_expo/src/screens/checkout_screen.dart';
 import 'package:eupeel_expo/src/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -72,6 +73,7 @@ class MyApp extends StatelessWidget {
                     ),
                   ),
                 ),
+
                 elevatedButtonTheme: ElevatedButtonThemeData(
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.white,
@@ -89,6 +91,7 @@ class MyApp extends StatelessWidget {
           initialRoute: "/",
           routes: {
             "/": (context) => HomeScreen(),
+            "/checkout": (context) => const CheckoutScreen(),
           },
         ),
       ),

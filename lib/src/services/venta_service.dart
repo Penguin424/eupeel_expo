@@ -18,6 +18,7 @@ class VentaService extends ChangeNotifier {
   String _metodoPago = "";
   String _nota = "";
   ProductoCosbiomeModel _productoEupeelSelected = ProductoCosbiomeModel();
+  bool _isRedirectToCheckOut = false;
 
   int get cantidad => _cantidad;
   List<Map<String, dynamic>> get productosVenta => _productosVenta;
@@ -29,6 +30,7 @@ class VentaService extends ChangeNotifier {
   String get metodoPago => _metodoPago;
   String get nota => _nota;
   ProductoCosbiomeModel get productoEupeel => _productoEupeelSelected;
+  bool get isRedirectToCheckOut => _isRedirectToCheckOut;
 
   set productosVenta(List<Map<String, dynamic>> value) {
     _productosVenta.clear();
@@ -84,6 +86,11 @@ class VentaService extends ChangeNotifier {
     notifyListeners();
   }
 
+  set isRedirectToCheckOut(bool value) {
+    _isRedirectToCheckOut = value;
+    notifyListeners();
+  }
+
   Future<CosbiomeVentaResponseModel> handleRegistrarVenta(
     BuildContext context,
   ) async {
@@ -104,7 +111,7 @@ class VentaService extends ChangeNotifier {
         "peso": "0kg",
         "sucursal": "FEDERALISMO",
         "procesoList": [],
-        "vendedor": PreferencesUtils.getString("user"),
+        "vendedor": "PUNTO DE VENTA NFC",
         "total": total,
         "subTotal": subTotal,
         "referencia": "",
@@ -216,6 +223,10 @@ class VentaService extends ChangeNotifier {
         },
         cantidad: cantidad,
       );
+
+      if (isRedirectToCheckOut) {
+        Navigator.pushNamed(context, "/checkout");
+      }
     } catch (e) {
       rethrow;
     }
@@ -305,13 +316,13 @@ class VentaService extends ChangeNotifier {
     total = subTotal;
 
     if (subTotal > 9000 && subTotal <= 14000) {
-      descuento = metodoPago == "Tarjeta" ? 0.65 : 0.60;
+      descuento = metodoPago == "Tarjeta" ? 0.85 : 0.80;
       total = subTotal * descuento;
     } else if (subTotal > 14000) {
-      descuento = metodoPago == "Tarjeta" ? 0.55 : 0.50;
+      descuento = metodoPago == "Tarjeta" ? 0.80 : 0.75;
       total = subTotal * descuento;
     } else {
-      descuento = metodoPago == "Tarjeta" ? 0.75 : 0.70;
+      descuento = metodoPago == "Tarjeta" ? 0.90 : 0.85;
       total = subTotal * descuento;
     }
   }

@@ -22,7 +22,6 @@ class NFCServices extends ChangeNotifier {
       false; // Evita leer/escribir la misma tarjeta infinitamente
 
   int _isReadTextPushTag = 0;
-
   // --- GETTERS ---
 
   String get textToWrite => _textToWrite;
@@ -89,8 +88,8 @@ class NFCServices extends ChangeNotifier {
       // 1. Abrimos sesión (Carga el driver de Windows una sola vez)
       _reader.startSession();
 
-      // 2. Iniciamos el Timer (Cada 1 segundo)
-      loopTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      // 2. Iniciamos el Timer (Cada 2 segundos)
+      loopTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
         processAutoLoop(context);
       });
 
@@ -103,7 +102,9 @@ class NFCServices extends ChangeNotifier {
     }
   }
 
-  Future<void> processAutoLoop(BuildContext context) async {
+  Future<void> processAutoLoop(
+    BuildContext context,
+  ) async {
     // Si estamos haciendo algo manual, o el sistema está ocupado, saltamos este ciclo
     if (isLoading) return;
 
@@ -115,7 +116,9 @@ class NFCServices extends ChangeNotifier {
   }
 
   // Lógica: Leer Automáticamente
-  Future<void> autoReadLogic(BuildContext context) async {
+  Future<void> autoReadLogic(
+    BuildContext context,
+  ) async {
     // tryReadNdef ya maneja ping y reintentos internamente.
     // Retorna null si no hay tarjeta o falla.
     String? text = await _reader.tryReadNdef();
@@ -130,12 +133,21 @@ class NFCServices extends ChangeNotifier {
           status = "¡Lectura Auto Exitosa!";
           cardAlreadyProcessed = true; // Marcamos para no volver a leerla
           // Feedback visual rápido
+
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text("Tarjeta leída"),
+              content: Text(
+                "Producto agregado a la compra",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 26,
+                ),
+              ),
               duration: Duration(milliseconds: 500),
-              backgroundColor: Colors.blue,
+              backgroundColor: Colors.transparent,
             ),
           );
         }

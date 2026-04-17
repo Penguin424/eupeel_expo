@@ -37,7 +37,7 @@ class NfcReader {
           readSuccess = true;
           break;
         } catch (e) {
-          await Future.delayed(const Duration(milliseconds: 100));
+          await Future.delayed(const Duration(milliseconds: 6000));
         }
       }
 

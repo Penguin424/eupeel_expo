@@ -7,10 +7,12 @@ class AlmacenService extends ChangeNotifier {
   String _scannedTextService = '';
   ProductoCosbiomeModel? _productoAlmacenModel;
   bool _enableScanning = true;
+  List<ProductoCosbiomeModel> _productos = [];
 
   String get scannedTextService => _scannedTextService;
   ProductoCosbiomeModel? get productoAlmacenModel => _productoAlmacenModel;
   bool get enableScanning => _enableScanning;
+  List<ProductoCosbiomeModel> get productos => _productos;
 
   set scannedTextService(String value) {
     _scannedTextService = value;
@@ -25,6 +27,31 @@ class AlmacenService extends ChangeNotifier {
   set enableScanning(bool value) {
     _enableScanning = value;
     notifyListeners();
+  }
+
+  set productos(List<ProductoCosbiomeModel> value) {
+    _productos = value;
+    notifyListeners();
+  }
+
+  Future<void> handleGetProductos() async {
+    try {
+      final productosDB = await Http.get(
+        path: "cosbiomeproductos",
+        parameters: {
+          "categoria": "EUPEEL",
+          "_limit": "100",
+        },
+      );
+
+      productos = productosDB.data
+          .map<ProductoCosbiomeModel>(
+            (producto) => ProductoCosbiomeModel.fromJson(producto),
+          )
+          .toList();
+    } catch (e) {
+      debugPrint(e.toString());
+    }
   }
 
   handleGetProductoConId(BuildContext context, String id, Size size) async {
