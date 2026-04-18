@@ -116,7 +116,7 @@ class VentaService extends ChangeNotifier {
         "subTotal": subTotal,
         "referencia": "",
         "productosCompra": productosVenta,
-        "numTel": "3319747514",
+        "numTel": numTel,
         "nota": ".",
         "nombreCliente": nombreCliente,
         "metodoDePago": metodoPago,
