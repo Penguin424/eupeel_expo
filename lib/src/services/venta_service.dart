@@ -17,6 +17,7 @@ class VentaService extends ChangeNotifier {
   String _numTel = "";
   String _metodoPago = "";
   String _nota = "";
+  String _almacenVenta = "enExpo";
   ProductoCosbiomeModel _productoEupeelSelected = ProductoCosbiomeModel();
   bool _isRedirectToCheckOut = false;
 
@@ -29,6 +30,7 @@ class VentaService extends ChangeNotifier {
   String get numTel => _numTel;
   String get metodoPago => _metodoPago;
   String get nota => _nota;
+  String get almacenVenta => _almacenVenta;
   ProductoCosbiomeModel get productoEupeel => _productoEupeelSelected;
   bool get isRedirectToCheckOut => _isRedirectToCheckOut;
 
@@ -81,6 +83,11 @@ class VentaService extends ChangeNotifier {
     notifyListeners();
   }
 
+  set almacenVenta(String value) {
+    _almacenVenta = value;
+    notifyListeners();
+  }
+
   set productoEupeelSelected(ProductoCosbiomeModel value) {
     _productoEupeelSelected = value;
     notifyListeners();
@@ -120,7 +127,7 @@ class VentaService extends ChangeNotifier {
         "nota": ".",
         "nombreCliente": nombreCliente,
         "metodoDePago": metodoPago,
-        "medio": "enExpo",
+        "medio": almacenVenta,
         "iva": 0,
         "idPedido": idPedido,
         "idFirebase": "",
