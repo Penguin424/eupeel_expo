@@ -692,7 +692,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 ElevatedButton.icon(
                   onPressed: () => _descargarFactura(venta),
                   icon: const Icon(Icons.download),
-                  label: const Text("Descargar factura"),
+                  label: const Text("Descargar cotización PDF"),
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(

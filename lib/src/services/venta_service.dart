@@ -323,13 +323,13 @@ class VentaService extends ChangeNotifier {
     total = subTotal;
 
     if (subTotal > 8000 && subTotal <= 14000) {
-      descuento = metodoPago == "Tarjeta" ? 0.75 : 0.70;
+      descuento = metodoPago == "Tarjeta" ? 0.85 : 0.80;
       total = subTotal * descuento;
     } else if (subTotal > 14000) {
-      descuento = metodoPago == "Tarjeta" ? 0.65 : 0.60;
+      descuento = metodoPago == "Tarjeta" ? 0.80 : 0.75;
       total = subTotal * descuento;
     } else {
-      descuento = metodoPago == "Tarjeta" ? 0.85 : 0.80;
+      descuento = metodoPago == "Tarjeta" ? 0.90 : 0.85;
       total = subTotal * descuento;
     }
   }
